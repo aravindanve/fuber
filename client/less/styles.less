@@ -1,0 +1,241 @@
+
+@import url(candyfrost-lite.less);
+
+@bodyfont: 'Roboto', arial, sans-serif;
+
+html, body {
+    height: 100%;
+    min-width: 950px;
+}
+
+.page {
+    position: relative;
+    height: 100%;
+}
+
+.fuber-logo {
+    font-weight: bold;
+    font-size: 24px;
+    color: #ccc;
+}
+
+.panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 350px;
+    border-right: #eee solid 5px;
+    overflow: scroll;
+}
+
+.section {
+    .s-title {
+        font-weight: 300;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    .s-content {
+        margin-bottom: 15px;
+    }
+}
+
+.customers {
+    margin-bottom: 15px;
+}
+
+.a-item {
+    .cf;
+    margin-bottom: 15px;
+}
+
+.a-title {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.a-input {
+    input, button, .button, label {
+        display: block;
+        float: left;
+    }
+    &.combo-1 {
+        input {
+            width: 80px;
+            text-align: right;
+            margin-right: 10px;
+        }
+    }
+    &.combo-2 {
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.customer {
+    position: relative;
+    margin: 0 -10px;
+    border-bottom: #ddd solid 1px;
+
+    .user {
+        display: block;
+        color: #000;
+        text-decoration: none;
+        margin-right: 30px;
+        padding: 10px;
+        min-height: 58px;
+
+        &:hover {
+            color: #000;
+            background-color: #eee;
+            border-bottom-color: transparent;
+        }
+
+        &.current {
+            background-color: @link-color;
+            color: #fff;
+        }
+
+        .u-status {
+            font-size: 14px;
+        }
+    }
+
+    .user-remove {
+        display: block;
+        color: #000;
+        text-decoration: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 30px;
+        min-height: 58px;
+        padding: 10px 0;
+        text-align: center;
+
+        &:hover {
+            color: #fff;
+            background-color: lighten(#f30, 20%);
+            border-bottom-color: transparent;
+        }
+    }
+}
+
+.map {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-width: 600px;
+    margin-left: 350px;
+
+    background-color: #f6f6f6;
+
+    .grid {
+        background-color: transparent;
+        background-image: 
+            linear-gradient(
+                0deg, 
+                transparent 24%, 
+                rgba(4, 4, 4, .05) 25%, 
+                rgba(4, 4, 4, .05) 26%, 
+                transparent 27%, 
+                transparent 74%, 
+                rgba(4, 4, 4, .05) 75%, 
+                rgba(4, 4, 4, .05) 76%, 
+                transparent 77%, 
+                transparent
+            ), 
+            linear-gradient(
+                90deg, 
+                transparent 24%, 
+                rgba(4, 4, 4, .05) 25%, 
+                rgba(4, 4, 4, .05) 26%, 
+                transparent 27%, 
+                transparent 74%, 
+                rgba(4, 4, 4, .05) 75%, 
+                rgba(4, 4, 4, .05) 76%, 
+                transparent 77%, 
+                transparent);
+        height:100%;
+        background-size:50px 50px;
+    }
+
+    .info-layer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        margin-left: -5px;
+
+        background-color: @yellow;
+        padding: 15px;
+        padding-right: 45px;
+        border-left: darken(@yellow, 13%) solid 5px;
+
+        &.error {
+            background-color: @red;
+            color: #fff;
+            border-left-color: darken(@red, 13%);
+        }
+    }
+
+    .action-layer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        cursor: pointer;
+
+        .car {
+            position: absolute;
+            width: 0;
+            height: 0;
+            margin-left: -5px;
+            margin-top: -5px;
+            border: @black solid 10px;
+            border-radius: 50px;
+
+            &:hover {
+                border-width: 12px;
+                margin-left: -7px;
+                margin-top: -7px;
+            }
+
+            &.pink {
+                border-color: @pink;
+            }
+        }
+    }
+}
+
+.popup {
+    display: none;
+    position: absolute;
+    border: #ccc solid 1px;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 15px;
+    max-width: 240px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

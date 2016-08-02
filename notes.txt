@@ -1,0 +1,16 @@
+
+# admin
+addCar
+deleteCar
+
+# cabbie
+updateCar 
+
+# user
+addUser
+updateUser
+deleteUser
+
+requestCar
+
+git remote set-url origin $(cat repo.txt)

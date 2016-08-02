@@ -1,0 +1,99 @@
+// common
+
+.cf, .clearfix {
+    &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+    }
+    * html & { zoom: 1; } // IE6
+    *:first-child+html & { zoom: 1; } // IE7
+}
+
+.fw, .force-wrap {
+    white-space: pre; // css 2.0
+    white-space: pre-wrap; // css 2.1
+    white-space: pre-line; // css 3.0
+    white-space: -pre-wrap; // opera 4-6
+    white-space: -o-pre-wrap; // opera 7
+    white-space: -moz-pre-wrap; // mozilla
+    white-space: -hp-pre-wrap; // hp printers
+    word-wrap: break-word; // IE 5+
+}
+
+.ep, .ellipsis 
+{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+}
+
+.nl, .nolist {
+    display: block;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    &  > li {
+        display: block;
+        float: none;
+    }
+}
+
+.ns, .noselect {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.na, .noappearance {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+.cb, .clearboth {
+    float: none;
+    display: block;
+    clear: both;
+}
+
+.box-shadow(@h, @v, @blur, @spread, @color) {
+    -webkit-box-shadow: @h @v @blur @spread @color;
+    -moz-box-shadow:    @h @v @blur @spread @color; 
+    box-shadow:         @h @v @blur @spread @color; 
+}
+
+.inset-box-shadow(@h, @v, @blur, @spread, @color) {
+    -webkit-box-shadow: inset @h @v @blur @spread @color;
+    -moz-box-shadow:    inset @h @v @blur @spread @color; 
+    box-shadow:         inset @h @v @blur @spread @color; 
+}
+
+.for(@list, @code) {
+    & {
+        .loop(@i:1) when (@i =< length(@list)) {
+            @value: extract(@list, @i);
+            @code();
+            .loop(@i + 1);
+        }
+        .loop();
+    }
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+
+// eof
