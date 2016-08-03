@@ -233,20 +233,18 @@
             pink: pink
 
         }, function (res) {
-            updateUser(function () {
-                if (res.status && 'rideStarted' == res.status) {
-                    $(panelPageTitleSelector).html('Ride Started');
-                    $(panelPageContentSelector).html(
-                        'Click anywhere on the map to end ride');
-                    
-                } else {
-                    $(panelPageTitleSelector).html('Unavailable');
-                    $(panelPageContentSelector).html(
-                        'Sorry there are no cars available at this moment.');
-                }
-                showPage();
-                refresh();
-            });
+            if (res.status && 'rideStarted' == res.status) {
+                $(panelPageTitleSelector).html('Ride Started');
+                $(panelPageContentSelector).html(
+                    'Click anywhere on the map to end ride');
+                
+            } else {
+                $(panelPageTitleSelector).html('Unavailable');
+                $(panelPageContentSelector).html(
+                    'Sorry there are no cars available at this moment.');
+            }
+            showPage();
+            refresh();
         });
     }
 
@@ -278,34 +276,32 @@
             lat: location[1]
 
         }, function (res) {
-            updateUser(function () {
-                if (res.status && 'rideEnded' == res.status) {
-                    $(panelPageTitleSelector).html('Ride Ended');
-                    $(panelPageContentSelector).html(
-                        rideEndedTemplate
-                            .replace(/%ID%/g, res.ride._id)
-                            .replace(/%USERNAME%/g, _user.username)
-                            .replace(/%DISTANCE%/g, 
-                                (Math.round(res.ride.distance*100)/100
-                                    ) + ' km')
-                            .replace(/%TIME%/g, 
-                                (Math.round(res.ride.time*100)/100
-                                    ) + ' min')
-                            .replace(/%PINK%/g, 
-                                res.ride.pinkCarRequested? 
-                                    '5.00 dogecoins' : '0')
-                            .replace(/%BILL%/g, 
-                                res.ride.tripCost.toFixed(2) + 
-                                ' dogecoins')
-                    );
-                } else {
-                    $(panelPageTitleSelector).html('Unavailable');
-                    $(panelPageContentSelector).html(
-                        'Something went wrong, unable to stop the ride.');
-                }
-                showPage();
-                refresh();
-            });
+            if (res.status && 'rideEnded' == res.status) {
+                $(panelPageTitleSelector).html('Ride Ended');
+                $(panelPageContentSelector).html(
+                    rideEndedTemplate
+                        .replace(/%ID%/g, res.ride._id)
+                        .replace(/%USERNAME%/g, _user.username)
+                        .replace(/%DISTANCE%/g, 
+                            (Math.round(res.ride.distance*100)/100
+                                ) + ' km')
+                        .replace(/%TIME%/g, 
+                            (Math.round(res.ride.time*100)/100
+                                ) + ' min')
+                        .replace(/%PINK%/g, 
+                            res.ride.pinkCarRequested? 
+                                '5.00 dogecoins' : '0')
+                        .replace(/%BILL%/g, 
+                            res.ride.tripCost.toFixed(2) + 
+                            ' dogecoins')
+                );
+            } else {
+                $(panelPageTitleSelector).html('Unavailable');
+                $(panelPageContentSelector).html(
+                    'Something went wrong, unable to stop the ride.');
+            }
+            showPage();
+            refresh();
         });
     }
 
