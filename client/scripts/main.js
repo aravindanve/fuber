@@ -1,14 +1,56 @@
 
 +function ($, document, window) {
 
-    var api = '/api';
+    var apiPath = '/api';
+
+    var messageSelector = '[data-message]',
+        clearMessageSelector = '[data-clear-message]',
+        panelMainSelector = '[data-panel-main]',
+        panelPageSelector = '[data-panel-page]',
+        panelPageTitleSelector = '[data-pp-title]',
+        panelPageContentSelector = '[data-pp-content]',
+        showMainSelector = '[data-show-main]',
+        usersSelector = '[data-users]',
+        carsSelector = '[data-cars]',
+        newUserInputSelector = '[name="new-user"]',
+        newCarsInputSelector = '[name="new-cars"]',
+        addUserSelector = '[data-add-user]',
+        removeUserSelector = '[data-remove-user]',
+        userSelector = '[data-user]',
+        userData = 'data-user',
+        userIdData = 'data-id',
+        addCarsSelector = '[data-add-cars]',
+        deleteCarSelector = '[data-delete-car]',
+        deleteCarData = 'data-delete-car',
+        deleteCarsSelector = '[data-delete-cars]',
+        carSelector = '[data-car]',
+        actionLayer = '.action-layer',
+        carData = 'data-car',
+        locationSelector = '[data-location]',
+        mapLeftOffset = 350,
+        requestCarSelector = '[data-request-car]',
+        requestIdData = 'data-request-id',
+        requestLocationData = 'data-request-location',
+        requestPinkData = 'data-request-pink',
+        stopRideSelector = '[data-stop-ride]';
+
+    var _user = null;
 
     function msg(str) {
-        $('[data-message]').html(str);
+        $(messageSelector)
+            .html(str)
+            .parent()
+            .css('display', 'block');
     } 
 
+    function clearMsg() {
+        $(messageSelector)
+            .parent()
+            .css('display', '');
+    }
+
     function err(str) {
-        $('[data-message]').html(str);
+        msg(str);
     }
 
     function req(type, url, data, cb) {
@@ -16,13 +58,14 @@
 
         $.ajax({
             type: type,
-            url: api + url,
+            url: apiPath + url,
             data: data || null,
             dataType: 'json',
             success: function (res) {
                 if (res.error) {
-                    var errText = (res.name? res.name + ': ' : '') + 
-                        res.message;
+                    var errText = (
+                        res.name? res.name + ': ' : ''
+                        ) + res.message;
                     return err(errText);
                 } 
                 return cb(res);
@@ -41,16 +84,40 @@
         })
     }
 
-    var CURRENT_USER = null;
+    function showPage() {
+        $(panelMainSelector).css('display', 'none');
+        $(panelPageSelector).css('display', 'block');
+    }
+
+    function showMain() {
+        $(panelMainSelector).css('display', '');
+        $(panelPageSelector).css('display', '');
+        refresh();
+    }
+
+    function showMainAction() {
+        $(carSelector).removeClass('current');
+        showMain();
+    }
 
     function refresh() {
-        hidePopup();
+        clearMsg();
         getUsers();
         getCars();
     }
 
-    function requestCarPopup(e) {
-        
+    function parsePixelPosition(location) {
+        return {
+            lng: ((location[0] - 76) * 600) + 100,
+            lat: ((location[1] - 12) * 600) + 50
+        };
+    }
+
+    function parseLocation(left, top) {
+        return {
+            lng: ((left - 100) / 600) + 76,
+            lat: ((top - 50) / 600) + 12
+        };
     }
 
     var carTemplate = '<a class="car%PINK%" data-car="%ID%" ' + 
@@ -58,12 +125,14 @@
 
     function getCars() {
         req('get', '/actions/getCars', function (res) {
-            $('[data-cars]').empty();
-            res.cars.forEach(function (item, i) {
-                var lng = ((item.location[0] - 76) * 600) + 100,
-                    lat = ((item.location[1] - 12) * 600) + 50;
+            $(carsSelector).empty();
 
-                $('[data-cars]').append(
+            res.cars.forEach(function (item, i) {
+                var pos = parsePixelPosition(item.location),
+                    lng = pos.lng,
+                    lat = pos.lat;
+
+                $(carsSelector).append(
                     carTemplate
                         .replace(/%ID%/g, item._id)
                         .replace(/%LNG%/g, lng)
@@ -76,6 +145,170 @@
         });
     }
 
+    var locationTemplate = '<a class="location current" ' + 
+        'data-location="%COORD%" ' + 
+        'style="left: %LNG%px; top: %LAT%px;"></a>';
+
+    function selectLocation(e) {
+        if (!$(this).filter(actionLayer).length) return;
+        var posX = e.pageX - $(this).position().left - mapLeftOffset,
+            posY = e.pageY - $(this).position().top,
+            loc = parseLocation(posX, posY);
+
+        $(locationSelector).remove();
+        $(this).append(locationTemplate
+            .replace(/%LNG%/, posX)
+            .replace(/%LAT%/, posY));
+
+        locationSelected(loc.lng, loc.lat);
+    }
+
+    var requestCarTemplate = '<div class="props">' + 
+            '<div><span class="prop-name">user</span>' + 
+            '<span class="prop-val">%USERNAME%</span></div>' + 
+            '<div><span class="prop-name">location</span>' + 
+            '<span class="prop-val">%LOCATION%</span></div>' + 
+            '</div><div class="a-input combo-2" ' + 
+            'data-request-id="%ID%" data-request-location=' + 
+            '"%LOCATION%"><button ' + 
+            'class="blue" data-request-car="%ID%" ' + 
+            'data-request-pink="false">Request Car</button>' + 
+            '<button class="pink" data-request-car="%ID%" ' + 
+            'data-request-pink="true">' + 
+            'Request Pink Car</button></div>';
+
+    var stopRideTemplate = '<div class="props">' + 
+            '<div><span class="prop-name">user</span>' + 
+            '<span class="prop-val">%USERNAME%</span></div>' + 
+            '<div><span class="prop-name">location</span>' + 
+            '<span class="prop-val">%LOCATION%</span></div>' + 
+            '</div><div class="a-input combo-2" ' + 
+            'data-request-id="%ID%" data-request-location=' + 
+            '"%LOCATION%"><button ' + 
+            'class="blue" data-stop-ride="%ID%">' + 
+            'Stop Ride Here</button></div>';
+
+    var noUserSelectedTemplate = 'You must go back and select ' + 
+            'a user to request a car';
+
+    function locationSelected(lng, lat) {
+        $(panelPageTitleSelector).html('Location');
+        if (_user && _user.ride) {
+            $(panelPageContentSelector).html(
+                stopRideTemplate
+                    .replace(/%ID%/g, _user.ride)
+                    .replace(/%USERNAME%/g, _user.username)
+                    .replace(/%LOCATION%/g, [lng, lat].join(', '))
+            );
+            showPage();
+
+        } else if (_user) {
+            $(panelPageContentSelector).html(
+                requestCarTemplate
+                    .replace(/%ID%/g, _user._id)
+                    .replace(/%USERNAME%/g, _user.username)
+                    .replace(/%LOCATION%/g, [lng, lat].join(', '))
+            );
+            showPage();
+
+        } else {
+            $(panelPageContentSelector).html(
+                noUserSelectedTemplate);
+            showPage();
+        }
+    }
+
+    function requestCar(e) {
+        var parent = $(this).parent(),
+            userId = parent.attr(requestIdData),
+            location = parent.attr(requestLocationData),
+            pink = $(this).attr(requestPinkData);
+
+        location = location.replace(/\s/g, '').split(',');
+
+        req('put', '/actions/requestCar', {
+            userId: userId,
+            lng: location[0],
+            lat: location[1],
+            pink: pink
+
+        }, function (res) {
+            updateUser(function () {
+                if (res.status && 'rideStarted' == res.status) {
+                    $(panelPageTitleSelector).html('Ride Started');
+                    $(panelPageContentSelector).html(
+                        'Click anywhere on the map to end ride');
+                    
+                } else {
+                    $(panelPageTitleSelector).html('Unavailable');
+                    $(panelPageContentSelector).html(
+                        'Sorry there are no cars available at this moment.');
+                }
+                showPage();
+                refresh();
+            });
+        });
+    }
+
+    var rideEndedTemplate = '<div class="props">' + 
+            '<div><span class="prop-name">ID</span>' + 
+            '<span class="prop-val">%ID%</span></div>' + 
+            '<div><span class="prop-name">user</span>' + 
+            '<span class="prop-val">%USERNAME%</span></div>' + 
+            '<div><span class="prop-name">distance</span>' + 
+            '<span class="prop-val">%DISTANCE%</span></div>' +
+            '<div><span class="prop-name">time</span>' + 
+            '<span class="prop-val">%TIME%</span></div>' + 
+            '<div><span class="prop-name">pinkCharge</span>' + 
+            '<span class="prop-val">%PINK%</span></div>' + 
+            '<div><span class="prop-name">bill amount</span>' + 
+            '<span class="prop-val">%BILL%</span></div>' + 
+            '</div>';
+
+    function stopRide(e) {
+        var parent = $(this).parent(),
+            rideId = parent.attr(requestIdData),
+            location = parent.attr(requestLocationData);
+
+        location = location.replace(/\s/g, '').split(',');
+
+        req('put', '/actions/stopRide', {
+            rideId: rideId,
+            lng: location[0],
+            lat: location[1]
+
+        }, function (res) {
+            updateUser(function () {
+                if (res.status && 'rideEnded' == res.status) {
+                    $(panelPageTitleSelector).html('Ride Ended');
+                    $(panelPageContentSelector).html(
+                        rideEndedTemplate
+                            .replace(/%ID%/g, res.ride._id)
+                            .replace(/%USERNAME%/g, _user.username)
+                            .replace(/%DISTANCE%/g, 
+                                (Math.round(res.ride.distance*100)/100
+                                    ) + ' km')
+                            .replace(/%TIME%/g, 
+                                (Math.round(res.ride.time*100)/100
+                                    ) + ' min')
+                            .replace(/%PINK%/g, 
+                                res.ride.pinkCarRequested? 
+                                    '5.00 dogecoins' : '0')
+                            .replace(/%BILL%/g, 
+                                res.ride.tripCost.toFixed(2) + 
+                                ' dogecoins')
+                    );
+                } else {
+                    $(panelPageTitleSelector).html('Unavailable');
+                    $(panelPageContentSelector).html(
+                        'Something went wrong, unable to stop the ride.');
+                }
+                showPage();
+                refresh();
+            });
+        });
+    }
+
     function getRandomPosition() {
         // @13.1153645,77.4712135
         // @12.9372254,77.6234867
@@ -84,26 +317,27 @@
             lat: 13 - (Math.round(Math.random() * 10000000)/10000000)
         }
     }
-    function randomPink() {
+
+    function getRandomIsPink() {
         return Math.round(Math.random())? 'true' : 'false';
     }
 
     function addCars(e) {
-        var num = parseInt($('[name="new-cars"]').val());
+        var num = parseInt($(newCarsInputSelector).val()),
+            added = 0;
+
         isNaN(num) && (num = 0);
-        console.log(num);
         if (!num) return false;
-        var added = 0;
+
         function _done() {
             if (++added >= num) {
-                $('[name="new-user"]').val('');
                 refresh();
             }
         }
         for (var i = 0; i < num; i++) {
             req('post', '/car', {
                 driver: 'random car',
-                pink: randomPink()
+                pink: getRandomIsPink()
 
             }, function (res) {
                 var pos = getRandomPosition();
@@ -123,17 +357,22 @@
 
     function deleteCar(e) {
         req('delete', '/car', {
-            id: $(this).attr('data-delete-car')
+            id: $(this).attr(deleteCarData)
 
         }, function (res) {
+            showMain();
             refresh();
         });
         return false;
     }
 
     function deleteAllCars(e) {
-        req('get', '/actions/getCars', function (res) {
+        req('get', '/actions/getCars', {
+            active: 1
+
+        }, function (res) {
             var deleted = 0;
+
             function _done() {
                 if (++deleted >= res.cars.length) {
                     refresh();
@@ -151,114 +390,97 @@
         });
     }
 
-    var deleteCarTemplate = '<button class="red" ' + 
+    var deleteCarTemplate = '<div class="props">' + 
+            '<div><span class="prop-name">ID</span>' + 
+            '<span class="prop-val">%ID%</span></div>' + 
+            '<div><span class="prop-name">driver</span>' + 
+            '<span class="prop-val">%DRIVER%</span></div>' + 
+            '<div><span class="prop-name">location</span>' + 
+            '<span class="prop-val">%LOCATION%</span></div>' + 
+            '<div><span class="prop-name">isPink</span>' + 
+            '<span class="prop-val">%PINK%</span></div>' + 
+            '</div><button class="red" ' + 
             'data-delete-car="%ID%">Delete Car</button>';
 
     function showCarInfo(e) {
-        var position = $(this).position(),
-            left = position.left,
-            top = position.top,
-            gridWidth = $('[data-cars]').width(),
-            gridHeight = $('[data-cars]').height(),
-            rt = !!1, rr = !!1, rb = !!1, rl = !!1;
-
-        if (left > (gridWidth / 2)) {
-            $('[data-popup]').css({
-                left: 'auto',
-                right: (gridWidth - left - 5) + 'px'
-            });
-            rl = false;
-
-        } else {
-            $('[data-popup]').css({
-                right: 'auto',
-                left: (left + 5 + 350) + 'px'
-            });
-            rr = false;
-        }
-
-        if (top > (gridHeight / 2)) {
-            $('[data-popup]').css({
-                top: 'auto',
-                bottom: (gridHeight - top - 5) + 'px'
-            });
-            rt = false;
-
-        } else {
-            $('[data-popup]').css({
-                bottom: 'auto',
-                top: (top + 5) + 'px'
-            });
-            rb = false;
-        }
-
-        $('[data-popup]').css({
-            display: 'block',
-            borderRadius: 
-                (rl && rt? '0' : '6px') + ' ' + 
-                (rt && rr? '0' : '6px') + ' ' + 
-                (rr && rb? '0' : '6px') + ' ' + 
-                (rb && rl? '0' : '6px')
-        });
+        var $elem = $(this),
+            carId = $elem.attr(carData);
 
         req('get', '/car', {
-            id: $(this).data('car')
+            id: carId
 
         }, function (res) {
-            $('[data-popup]').empty()
-                .append(
-                    deleteCarTemplate
-                        .replace(/%ID%/g, res.car._id)
-                );
+            $(carSelector).removeClass('current');
+            $elem.addClass('current');
+            $(panelPageTitleSelector).html('Car');
+            $(panelPageContentSelector).html(
+                deleteCarTemplate
+                    .replace(/%ID%/g, res.car._id)
+                    .replace(/%DRIVER%/g, res.car.driver)
+                    .replace(/%LOCATION%/g, res.car.location.join(', '))
+                    .replace(/%PINK%/g, res.car.isPink? 'true' : 'false')
+            );
+            showPage();
+            // msg(JSON.stringify(res));
         });
+        $(locationSelector).remove();
         return false;
     }
 
-    function hidePopup(e) {
-        $('[data-popup]').css('display', '');
-    }
-
-    var userTemplate = '<div class="customer">'+
-            '<a class="user" data-user="%NAME%">'+
-            '<div class="u-name">%NAME%</div>'+
-            '<div class="u-status">trip active</div>'+
-            '</a><a class="user-remove" data-remove-user>&times;</a></div>';
+    var userTemplate = '<div class="customer">' +
+            '<a class="user%CURRENT%" data-user="%USERNAME%" ' + 
+            'data-id="%ID%">' +
+            '<div class="u-name">%USERNAME%</div>' +
+            '<div class="u-status%ACTIVECLASS%">%ACTIVE%</div>' +
+            '</a><a class="user-remove" data-remove-user>' +
+            '&times;</a></div>';
 
     function getUsers() {
         req('get', '/actions/getUsers', function (res) {
-            $('[data-customers]').empty();
+            $(usersSelector).empty();
+
             res.users.forEach(function (item, i) {
-                $('[data-customers]').append(
+                var activeClass = item.ride && 
+                        item.ride? ' active' : '',
+                    activeText = activeClass? 
+                        'ride active' : 'inactive',
+                    current = _user && (
+                        _user.username == item.username)? 
+                        ' current' : '';
+
+                if (current) {
+                    _user = item;
+                }
+                $(usersSelector).append(
                     userTemplate
-                        .replace(/%NAME%/g, item.username)
+                        .replace(/%CURRENT%/g, current)
+                        .replace(/%USERNAME%/g, item.username)
+                        .replace(/%ID%/g, item._id)
+                        .replace(/%ACTIVECLASS%/g, activeClass)
+                        .replace(/%ACTIVE%/g, activeText)
                     );
             });
-            if (CURRENT_USER &&
-                $('[data-user="' + CURRENT_USER + '"]').length) {
-                $('[data-user="' + CURRENT_USER + '"]')
-                    .addClass('current');
-
-            } else {
-                $('[data-user]').removeClass('current');
+            if (!$(userSelector).filter('.current').length) {
+                _user = null;
             }
             // msg(JSON.stringify(res));
         });
     }
 
     function addUser(e) {
-        var newUser = $('[name="new-user"]').val();
+        var newUser = $(newUserInputSelector).val();
         req('post', '/user', {
             username: newUser
 
         }, function (res) {
             // msg(JSON.stringify(res));
-            $('[name="new-user"]').val('');
+            $(newUserInputSelector).val('');
             refresh();
         });
     }
 
     function removeUser(e) {
-        var user = $(this).siblings('[data-user]').data('user');
+        var user = $(this).siblings(userSelector).attr(userData);
         req('delete', '/user', {
             username: user
 
@@ -269,28 +491,44 @@
     }
 
     function selectUser(e) {
-        $('[data-user]').removeClass('current');
-        $(this).addClass('current');
-        CURRENT_USER = $(this).data('user');
+        var $elem = $(this);
+        req('get', '/user', {
+            username: $elem.attr(userData)
+
+        }, function (res) {
+            $(userSelector).removeClass('current');
+            $elem.addClass('current');
+            _user = res.user;
+        });
+    }
+
+    function updateUser(cb) {
+        if (!_user) return;
+        req('get', '/user', {
+            username: _user.username
+
+        }, function (res) {
+            _user = res.user;
+            return cb();
+        });
     }
 
     $(document).ready(function () {
 
-        $(document).on('click', '[data-add-user]', addUser);
-        $(document).on('click', '[data-remove-user]', removeUser);
-        $(document).on('click', '[data-user]', selectUser);
-        $(document).on('click', '[data-add-cars]', addCars);
-        $(document).on('click', '[data-delete-car]', deleteCar);
-        $(document).on('click', '[data-delete-cars]', deleteAllCars);
-        $(document).on('click', '[data-car]', showCarInfo);
-
-
-        $(document).on('click', '[data-popup]', function (e) {
-            return false;
-        });
-        $(document).on('click', hidePopup);
-
+        $(document).on('click', clearMessageSelector, clearMsg);
+        $(document).on('click', showMainSelector, showMainAction);
+        $(document).on('click', addUserSelector, addUser);
+        $(document).on('click', removeUserSelector, removeUser);
+        $(document).on('click', userSelector, selectUser);
+        $(document).on('click', addCarsSelector, addCars);
+        $(document).on('click', deleteCarSelector, deleteCar);
+        $(document).on('click', deleteCarsSelector, deleteAllCars);
+        $(document).on('click', carSelector, showCarInfo);
+        $(document).on('click', actionLayer, selectLocation);
+        $(document).on('click', requestCarSelector, requestCar);
+        $(document).on('click', stopRideSelector, stopRide);
         refresh();
+        msg('Start booking cabs now!');
 
     });
 

@@ -8,12 +8,17 @@ var express = require('express'),
 
 module.exports = router;
 
-router.get('/getCars', function (req, res, next) {
-    models.Car.find({
-        location: {$size: 2},
-        ride: null
+router.get('/getCars', form(
+    field('active')
 
-    }, function (err, results) {
+), function (req, res, next) {
+    var query = {
+        location: {$size: 2}
+    };
+    if (!req.form.active) {
+        query.ride = null;
+    }
+    models.Car.find(query, function (err, results) {
         if (err) {
             return next(err);
         }
@@ -26,10 +31,7 @@ router.get('/getCars', function (req, res, next) {
 });
 
 router.get('/getUsers', function (req, res, next) {
-    models.User.find({
-        ride: null
-
-    }, function (err, results) {
+    models.User.find().exec(function (err, results) {
         if (err) {
             return next(err);
         }
@@ -44,7 +46,8 @@ router.get('/getUsers', function (req, res, next) {
 router.put('/requestCar', form(
     field('userId')
         .trim()
-        .required(),
+        .required()
+        .custom(validators.objectId),
     field('lng')
         .required()
         .isNumeric(),
@@ -128,7 +131,8 @@ router.put('/requestCar', form(
 router.put('/stopRide', form(
     field('rideId')
         .trim()
-        .required(),
+        .required()
+        .custom(validators.objectId),
     field('lng')
         .required()
         .isNumeric(),

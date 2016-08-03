@@ -1,5 +1,5 @@
 <div class="panel">
-    <div class="container-wrapper">
+    <div class="container-wrapper" data-panel-main>
         <div class="row">
             <div class="col">
                 <div class="section">
@@ -10,7 +10,7 @@
                 <div class="section">
                     <div class="s-title">Select Customer</div>
                     <div class="s-content">
-                        <div class="customers" data-customers>
+                        <div class="customers" data-users>
                             <!-- // -->
                         </div>
                         <div class="a-item">
@@ -38,7 +38,7 @@
                         <div class="a-item">
                             <div class="a-title">Delete Cars</div>
                             <div class="a-input combo-1">
-                                <button class="" data-delete-cars>Delete All Cars</button>
+                                <button class="red" data-delete-cars>Delete All Cars</button>
                             </div>
                         </div>
                     </div>
@@ -47,17 +47,30 @@
             <!-- // -->
         </div>
     </div>
+    <div class="container-wrapper" data-panel-page>
+        <div class="row">
+            <div class="col back-wrapper">
+                <a class="back-to-main" data-show-main>&larr; Back</a>
+            </div>
+            <div class="col">
+                <div class="section">
+                    <div class="s-title" data-pp-title></div>
+                    <div class="s-content" data-pp-content></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="map">
     <div class="grid"></div>
-    <div class="action-layer" data-cars></div>
+    <div class="item-layer">
+        <div class="action-layer" data-cars></div>
+    </div>
     <div class="info-layer">
         <div data-error></div>
         <div data-message></div>
+        <a class="clear-message" data-clear-message>&times;</a>
     </div>
-</div>
-<div class="popup" data-popup>
-    
 </div>
 
 

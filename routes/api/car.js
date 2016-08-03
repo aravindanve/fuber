@@ -44,7 +44,8 @@ router.route('/')
     .put(form(
         field('id')
             .trim()
-            .required(),
+            .required()
+            .custom(validators.objectId),
         field('driver')
             .trim(),
         field('pink')
@@ -87,6 +88,7 @@ router.route('/')
         field('id')
             .trim()
             .required()
+            .custom(validators.objectId)
 
     ), function (req, res, next) {
         if (req.form.isValid) {
@@ -117,6 +119,7 @@ router.route('/')
         field('id')
             .trim()
             .required()
+            .custom(validators.objectId)
 
     ), function (req, res, next) {
         if (req.form.isValid) {
@@ -163,7 +166,6 @@ router.route('/')
                 } else {
                     return deleteCar();
                 }
-                
             });
 
         } else {
@@ -179,7 +181,8 @@ router.route('/location')
     .put(form(
         field('id')
             .trim()
-            .required(),
+            .required()
+            .custom(validators.objectId),
         field('lng')
             .required()
             .isNumeric(),

@@ -42,7 +42,8 @@ router.route('/')
     .put(form(
         field('id')
             .trim()
-            .required(),
+            .required()
+            .custom(validators.objectId),
         field('username')
             .trim()
             .custom(validators.usernameAvailable)

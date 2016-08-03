@@ -446,6 +446,26 @@ describe('cab booking functionality', function () {
             });
     });
 
+    it('check if user ride is null', function (done) {
+        server
+            .get('/api/user')
+            .send({
+                username: 'myuser'
+            })
+            .expect(200)
+            .end(function (err, res) {
+                if (err) {
+                    throw err;
+                }
+                should(res.body.error).equal(false);
+
+                should.exist(res.body.user);
+                should(res.body.user.username).equal('myuser');
+                should.not.exist(res.body.user.ride);
+                done();
+            });
+    });
+
     var pinkTestTimes = 10;
 
     it('request pink cars', function (done) {

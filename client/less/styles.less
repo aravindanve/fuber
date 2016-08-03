@@ -27,6 +27,28 @@ html, body {
     width: 350px;
     border-right: #eee solid 5px;
     overflow: scroll;
+
+    [data-panel-page] {
+        display: none;
+    }
+}
+
+.back-wrapper {
+    padding: 0 !important; 
+    margin-bottom: 15px;
+}
+
+.back-to-main {
+    display: block;
+    text-decoration: none;
+    background-color: @link-color;
+    padding: 15px;
+    color: #fff;
+
+    &:hover {
+        color: #fff;
+        background-color: @link-color-light;
+    }
 }
 
 .section {
@@ -62,14 +84,21 @@ html, body {
     }
     &.combo-1 {
         input {
-            width: 80px;
             text-align: right;
+            width: 80px;
+        }
+        input, button, .button, label {
             margin-right: 10px;
         }
     }
     &.combo-2 {
         input {
             width: 100%;
+        }
+        input, button, .button, label {
+            display: block;
+            clear: left;
+            float: left;
             margin-bottom: 10px;
         }
     }
@@ -77,7 +106,7 @@ html, body {
 
 .customer {
     position: relative;
-    margin: 0 -10px;
+    margin: 0 -15px;
     border-bottom: #ddd solid 1px;
 
     .user {
@@ -85,7 +114,7 @@ html, body {
         color: #000;
         text-decoration: none;
         margin-right: 30px;
-        padding: 10px;
+        padding: 10px 15px;
         min-height: 58px;
 
         &:hover {
@@ -94,13 +123,26 @@ html, body {
             border-bottom-color: transparent;
         }
 
+        .u-status {
+            font-size: 14px;
+            color: @grey;
+
+            &.active {
+                color: @green;
+            }
+        }
+
         &.current {
             background-color: @link-color;
             color: #fff;
-        }
 
-        .u-status {
-            font-size: 14px;
+            .u-status {
+                color: lighten(@link-color, 30%);
+
+                &.active {
+                    color: #0f3;
+                }
+            }
         }
     }
 
@@ -167,6 +209,7 @@ html, body {
     }
 
     .info-layer {
+        display: none;
         position: absolute;
         top: 0;
         right: 0;
@@ -183,9 +226,25 @@ html, body {
             color: #fff;
             border-left-color: darken(@red, 13%);
         }
+
+        .clear-message {
+            display: block;
+            position: absolute;
+            color: #000;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 30px;
+            text-align: center;
+            line-height: 30px;
+
+            &:hover {
+                background-color: darken(@yellow, 10%);
+            }
+        }
     }
 
-    .action-layer {
+    .item-layer {
         position: absolute;
         top: 0;
         right: 0;
@@ -193,38 +252,66 @@ html, body {
         left: 0;
         cursor: pointer;
 
-        .car {
+        .action-layer {
+            position: relative;
+            height: 100%;
+        }
+
+        .car, .location {
             position: absolute;
             width: 0;
             height: 0;
-            margin-left: -5px;
-            margin-top: -5px;
-            border: @black solid 10px;
+            margin-left: -10px;
+            margin-top: -10px;
             border-radius: 50px;
 
             &:hover {
                 border-width: 12px;
-                margin-left: -7px;
-                margin-top: -7px;
+                margin-left: -12px;
+                margin-top: -12px;
             }
+
+            &.current {
+                padding: 4px;
+                background-color: #fff;
+                border-width: 6px;
+
+                &:hover {
+                    border-width: 8px;
+                }
+            }
+        }
+
+        .car {
+            border: @black solid 10px;
 
             &.pink {
                 border-color: @pink;
             }
         }
+
+        .location {
+            border: @green solid 10px;
+        }
     }
 }
 
-.popup {
-    display: none;
-    position: absolute;
-    border: #ccc solid 1px;
-    border-radius: 4px;
-    background-color: #fff;
-    padding: 15px;
-    max-width: 240px;
-}
+.props {
+    padding: 15px 0;
+    margin-bottom: 15px;
+    font-family: monospace;
+    font-size: 14px;
 
+    .prop-name {
+        &:after {
+            content: ': ';
+        }
+    }
+
+    .prop-val {
+        font-weight: bold;
+    }
+}
 
 
 
